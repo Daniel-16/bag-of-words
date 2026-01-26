@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
 import os
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL_PATH = os.path.join(BASE_DIR, "models", "aff_model.pkl")
@@ -21,6 +21,26 @@ def analyze():
 
     print("Generating Confusion Matrix...")
     cm = confusion_matrix(df['label'], df['prediction'])
+    
+    # Print confusion matrix values
+    print("\n   [Confusion Matrix]")
+    print(f"                    Predicted")
+    print(f"                  Legit  Fraud")
+    print(f"   Actual Legit    {cm[0][0]:5d}  {cm[0][1]:5d}")
+    print(f"          Fraud    {cm[1][0]:5d}  {cm[1][1]:5d}")
+    
+    # Calculate metrics from confusion matrix
+    acc = accuracy_score(df['label'], df['prediction'])
+    prec = precision_score(df['label'], df['prediction'])
+    rec = recall_score(df['label'], df['prediction'])
+    f1 = f1_score(df['label'], df['prediction'])
+    
+    print("\n   [Test Set Metrics]")
+    print(f"   Accuracy:  {acc:.2%}")
+    print(f"   Precision: {prec:.2%}")
+    print(f"   Recall:    {rec:.2%}")
+    print(f"   F1-Score:  {f1:.2%}")
+    
     plt.figure(figsize=(8, 6))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
                 xticklabels=['Legitimate', 'Fraud'], 
@@ -31,14 +51,21 @@ def analyze():
     save_path_cm = os.path.join(RESULTS_DIR, "confusion_matrix.png")
     plt.savefig(save_path_cm)
     plt.close()
-    print(f"   -> Saved to {save_path_cm}")
+    print(f"\n   -> Saved to {save_path_cm}")
 
-    print("Extracting Top Fraud Keywords...")
+    print("\nExtracting Top Fraud Keywords...")
     feature_names = vectorizer.get_feature_names_out()
     fraud_prob_sorted_indices = model.feature_log_prob_[1].argsort()[::-1]
     top_n = 20
     top_words = [feature_names[i] for i in fraud_prob_sorted_indices[:top_n]]
     top_scores = [model.feature_log_prob_[1][i] for i in fraud_prob_sorted_indices[:top_n]]
+    
+    print(f"\n   [Top {top_n} Fraud-Indicating Keywords]")
+    print("   Rank | Keyword          | Log Probability")
+    print("   " + "-" * 45)
+    for idx, (word, score) in enumerate(zip(top_words, top_scores), 1):
+        print(f"   {idx:2d}  | {word:15s} | {score:8.4f}")
+    
     plt.figure(figsize=(10, 8))
     sns.barplot(x=top_scores, y=top_words, palette='Reds_r')
     plt.xlabel('Log Probability (Higher = Stronger Indicator)')
@@ -46,7 +73,7 @@ def analyze():
     save_path_feat = os.path.join(RESULTS_DIR, "top_fraud_words.png")
     plt.savefig(save_path_feat)
     plt.close()
-    print(f"   -> Saved to {save_path_feat}")
+    print(f"\n   -> Saved to {save_path_feat}")
 
     print("\n--- TEST: SIMULATING A NEW EMAIL ---")
     custom_email = [

@@ -42,7 +42,13 @@ def train_robust():
 
     print("\n   [Average CV Results]")
     print(f"   Accuracy:  {np.mean(metrics['acc']):.2%}")
+    print(f"   Precision: {np.mean(metrics['prec']):.2%}")
+    print(f"   Recall:    {np.mean(metrics['rec']):.2%}")
     print(f"   F1-Score:  {np.mean(metrics['f1']):.2%}")
+    
+    print("\n   [Per-Fold Detailed Metrics]")
+    for fold in range(5):
+        print(f"   Fold {fold+1}: Acc={metrics['acc'][fold]:.2%}, Prec={metrics['prec'][fold]:.2%}, Rec={metrics['rec'][fold]:.2%}, F1={metrics['f1'][fold]:.2%}")
 
     print("\n--- PHASE 2: Generating Test Data for Visualization ---")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
@@ -51,9 +57,20 @@ def train_robust():
     viz_model = MultinomialNB()
     viz_model.fit(X_train_vec, y_train)
     viz_preds = viz_model.predict(X_test_vec)
+    
+    test_acc = accuracy_score(y_test, viz_preds)
+    test_prec = precision_score(y_test, viz_preds)
+    test_rec = recall_score(y_test, viz_preds)
+    test_f1 = f1_score(y_test, viz_preds)
+    print(f"\n   [Test Set Performance (20% holdout)]")
+    print(f"   Accuracy:  {test_acc:.2%}")
+    print(f"   Precision: {test_prec:.2%}")
+    print(f"   Recall:    {test_rec:.2%}")
+    print(f"   F1-Score:  {test_f1:.2%}")
+    
     test_df = pd.DataFrame({'text': X_test, 'label': y_test, 'prediction': viz_preds})
     test_df.to_csv(TEST_PREDS_PATH, index=False)
-    print(f"   -> Saved test predictions to {TEST_PREDS_PATH}")
+    print(f"\n   -> Saved test predictions to {TEST_PREDS_PATH}")
 
     print("\n--- PHASE 3: Training Final System Brain ---")
     final_model = MultinomialNB()
