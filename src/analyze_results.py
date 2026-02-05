@@ -22,14 +22,12 @@ def analyze():
     print("Generating Confusion Matrix...")
     cm = confusion_matrix(df['label'], df['prediction'])
     
-    # Print confusion matrix values
     print("\n   [Confusion Matrix]")
     print(f"                    Predicted")
     print(f"                  Legit  Fraud")
     print(f"   Actual Legit    {cm[0][0]:5d}  {cm[0][1]:5d}")
     print(f"          Fraud    {cm[1][0]:5d}  {cm[1][1]:5d}")
     
-    # Calculate metrics from confusion matrix
     acc = accuracy_score(df['label'], df['prediction'])
     prec = precision_score(df['label'], df['prediction'])
     rec = recall_score(df['label'], df['prediction'])

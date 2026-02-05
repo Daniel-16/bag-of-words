@@ -1,7 +1,3 @@
-"""
-Comprehensive metrics extraction and display script.
-Prints all relevant data from dataset, training, and analysis files.
-"""
 import pandas as pd
 import numpy as np
 import os
@@ -50,7 +46,6 @@ def print_dataset_stats():
     else:
         print("   ✓ No missing values")
     
-    # Text length statistics
     df['text_length'] = df['clean_text'].str.len()
     print(f"\n Text Length Statistics:")
     print(f"   Mean: {df['text_length'].mean():.1f} characters")
@@ -101,7 +96,6 @@ def print_model_metrics():
     print(f"   Actual Legit    {cm[0][0]:5d}  {cm[0][1]:5d}")
     print(f"          Fraud    {cm[1][0]:5d}  {cm[1][1]:5d}")
     
-    # Calculate additional metrics
     tn, fp, fn, tp = cm.ravel()
     specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
     print(f"\n Additional Metrics:")
