@@ -12,7 +12,6 @@ wheels/
 data/raw/
 data/processed/
 
-models/*.pkl
 results/*.png
 
 .ipynb_checkpoints/

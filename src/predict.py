@@ -10,14 +10,20 @@ MODEL_PATH = os.path.join(BASE_DIR, "models", "aff_model.pkl")
 VEC_PATH = os.path.join(BASE_DIR, "models", "vectorizer.pkl")
 
 def load_system():
+    """
+    Load model and vectorizer from disk. Returns (None, None) if files are missing
+    (e.g. on first deploy without committed model files).
+    """
     print("Loading AI Brain...")
     try:
         model = joblib.load(MODEL_PATH)
         vectorizer = joblib.load(VEC_PATH)
+        print("Model and vectorizer loaded.")
         return model, vectorizer
-    except FileNotFoundError:
-        print("Error: Model files not found. Did you run train_model.py?")
-        exit()
+    except FileNotFoundError as e:
+        print(f"Model files not found: {e}")
+        print("Run train_model.py locally, then commit models/*.pkl for deployment.")
+        return None, None
 
 def predict_message(model, vectorizer, text):
     cleaned = clean_text(text)

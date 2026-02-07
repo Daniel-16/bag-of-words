@@ -126,6 +126,25 @@ baggage/
 
 ---
 
+## Deployment (e.g. Render)
+
+The API starts even if the model files are missing; `/health` returns `model_loaded: false` and `/predict` returns **503** until the model is available. To serve predictions in production:
+
+**Option A — Commit the trained model (simplest)**  
+1. Locally: run `uv run python src/train_model.py` so `models/aff_model.pkl` and `models/vectorizer.pkl` exist.  
+2. In `.gitignore`, remove or comment out `models/*.pkl` (or stop ignoring the whole `models/` directory).  
+3. Commit and push the two `.pkl` files. Render will deploy with the model and predictions will work.
+
+**Option B — Train at build time**  
+1. Add your training data to the repo (e.g. commit `data/processed/clean_dataset.csv` and adjust `.gitignore`), or fetch it in a build script.  
+2. In Render, set **Build Command** to run the pipeline and training, e.g.:  
+   `uv sync && uv run python src/data_loader.py && uv run python src/train_model.py`  
+   (Only works if the build has access to the required raw/processed data.)
+
+Start command for the web service: `uv run uvicorn src.api:app --host 0.0.0.0 --port $PORT`
+
+---
+
 ## Model details
 
 - **Classifier**: `sklearn.naive_bayes.MultinomialNB`

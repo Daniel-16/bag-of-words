@@ -69,6 +69,15 @@ def predict(request: PredictRequest):
     if not request.text.strip():
         raise HTTPException(status_code=400, detail="Text must not be empty.")
 
+    if app.state.model is None or app.state.vectorizer is None:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Model not loaded. Run train_model.py and commit models/aff_model.pkl "
+                "and models/vectorizer.pkl, or run training in the deploy build step."
+            ),
+        )
+
     try:
         label, confidence = predict_message(app.state.model, app.state.vectorizer, request.text)
     except FileNotFoundError as e:
