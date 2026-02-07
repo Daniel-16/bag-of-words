@@ -1,6 +1,4 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL ??
-  (import.meta.env.DEV ? "http://localhost:8000" : "https://bag-of-words.onrender.com");
+const API_BASE_URL = "https://bag-of-words.onrender.com";
 
 export interface PredictRequest {
   text: string;
